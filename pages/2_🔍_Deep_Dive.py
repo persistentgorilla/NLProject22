@@ -165,7 +165,7 @@ if selected_ratings:
 
 # Theme filter
 if selected_themes:
-    theme_masks = [filtered_df[f"theme_{t}"] == True for t in selected_themes]
+    theme_masks = [filtered_df[f"theme_{t}"].astype(bool) for t in selected_themes]
     if theme_masks:
         combined_mask = theme_masks[0]
         for m in theme_masks[1:]:
@@ -287,7 +287,7 @@ else:
             else "#B3B3B3"
         )
 
-        themes_found = [t for t in theme_list if row.get(f"theme_{t}") == True]
+        themes_found = [t for t in theme_list if bool(row.get(f"theme_{t}", False))]
         theme_badges = "".join(
             [
                 f'<span class="theme-tag">{escape_html(settings.THEME_TAXONOMY[t]["icon"])} {escape_html(t)}</span>'

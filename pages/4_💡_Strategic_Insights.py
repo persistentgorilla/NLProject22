@@ -109,7 +109,12 @@ pain_themes = exec_summary.get("pain_themes", [])
 title_col, export_col = st.columns([5, 1])
 with title_col:
     st.title("Problems to validate")
-    st.markdown(exec_summary.get("headline", ""))
+    st.markdown(
+        "Six questions about music discovery and repetitive listening — answered from the review data. "
+        "Use these to sharpen your interview guide before talking to users."
+    )
+    if exec_summary.get("headline"):
+        st.markdown(exec_summary["headline"])
 with export_col:
     st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
     st.download_button(
@@ -141,6 +146,24 @@ with g3:
 st.markdown("#### Key takeaways")
 for finding in exec_summary.get("key_findings", []):
     st.markdown(f'<div class="finding-card">{escape_html(finding)}</div>', unsafe_allow_html=True)
+
+_active_profiles = [p for p in segment_profiles if p["negative_review_count"] > 0]
+if _active_profiles:
+    _rec = max(_active_profiles, key=lambda s: s["negative_review_count"])
+    st.markdown(
+        f"""
+        <div style="background: #142818; border: 1px solid #1DB954; border-radius: 10px; padding: 16px 20px; margin: 16px 0;">
+            <p style="color: #1DB954; font-size: 11px; font-weight: bold; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.5px;">Interview recommendation</p>
+            <p style="margin: 0; font-size: 14px; line-height: 1.6;">
+                Focus your 5–6 user interviews on <b>{escape_html(_rec['name'])}</b> —
+                they represent <b>{_rec['pct_of_negative']:.0f}% of all negative feedback</b> and their most reported issue is
+                <b>{escape_html(_rec['top_pain_area'])}</b>. See Q5 below for a full segment breakdown,
+                and open <b>Q4</b> and <b>Q6</b> to understand what drives repetitive listening and what users wish existed.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 st.markdown("---")
 st.subheader("Four user segments")
@@ -178,7 +201,7 @@ for q_idx, q_ans in enumerate(insights):
     quotes = q_ans.get("quotes", [])
     segments = q_ans.get("segment_breakdown", [])
 
-    with st.expander(f"{icon} {question}", expanded=(q_idx == 0)):
+    with st.expander(f"{icon} {question}", expanded=(q_idx in (0, 3, 5))):
         st.markdown("**Answer**")
         st.markdown(f'<div class="answer-card">{escape_html(answer)}</div>', unsafe_allow_html=True)
         st.markdown(

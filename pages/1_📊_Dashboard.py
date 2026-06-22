@@ -77,10 +77,10 @@ for _key, _default in (
 # ============================================================
 title_col, reset_col, export_col = st.columns([4, 1, 1])
 with title_col:
-    st.title("User feedback summary")
+    st.title("What Spotify users in India are saying")
     st.markdown(
-        "India-only feedback from app stores, Reddit, and community posts. "
-        "This page highlights **who is unhappy**, **what hurts most**, and **quotes you can validate**."
+        "Aggregated feedback from the Play Store, App Store, Reddit, and community forums — "
+        "analyzed to understand **why users aren't discovering new music** and **what keeps them stuck in the same listening loops**."
     )
 with reset_col:
     st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
@@ -157,9 +157,10 @@ headline = exec_summary.get("headline", "")
 if headline:
     st.info(headline)
 
-st.markdown("### 1. Who is affected")
+st.markdown("### 1. Who is feeling it")
 st.caption(
-    "Four user segments. Percentages can add up to more than 100% because one review can match multiple segments."
+    "Four user groups, defined by where they post and what they complain about. "
+    "Percentages can add up to more than 100% — a single review can belong to more than one group."
 )
 
 seg_cols = st.columns(4)
@@ -185,7 +186,8 @@ for idx, profile in enumerate(segment_profiles[:4]):
             unsafe_allow_html=True,
         )
 
-st.markdown("### 2. What hurts most")
+st.markdown("### 2. The biggest complaints")
+st.caption("Recurring problems across all sources, ranked by how often they appear in negative reviews.")
 if pain_themes:
     pain_cols = st.columns(len(pain_themes))
     for idx, pain in enumerate(pain_themes):
@@ -204,8 +206,44 @@ if pain_themes:
 else:
     st.warning("No themed pain areas found in negative reviews. Try increasing review volume or adding Reddit.")
 
-st.markdown("### 3. Quotes to validate")
-st.caption("Negative feedback with theme tags — use these in interviews or surveys.")
+st.markdown("### 3. What users want instead")
+st.caption(
+    "These aren't just complaints — users are telling us what they wish the product did. "
+    "Each group below maps to a category of unmet need."
+)
+
+_want_themes = [
+    ("theme_Feature Requests", "Explicit feature requests", "Users asking for something specific — better genre filters, smarter autoplay, controls they can't find today."),
+    ("theme_Content Diversity", "More variety in recommendations", "Users who feel the app only plays what they already know — they want to be surprised, not just served the familiar."),
+    ("theme_Listening Behavior", "Context-aware listening", "Users describe moods, activities, and energy levels. They want Spotify to understand the moment, not just their history."),
+]
+_want_data = []
+for col, label, desc in _want_themes:
+    if col in df.columns:
+        count = int(df[col].astype(bool).sum())
+        if count > 0:
+            _want_data.append({"label": label, "count": count, "desc": desc})
+
+if _want_data:
+    _w_cols = st.columns(len(_want_data))
+    for _i, _w in enumerate(_want_data):
+        with _w_cols[_i]:
+            st.markdown(
+                f"""
+                <div class="spotify-card">
+                    <h4 style="margin: 0 0 6px 0; color: #1DB954; font-size: 14px;">{escape_html(_w['label'])}</h4>
+                    <p style="font-size: 12px; color: #B3B3B3; margin: 0 0 10px 0;">{escape_html(_w['desc'])}</p>
+                    <p style="font-size: 22px; font-weight: bold; margin: 0;">{_w['count']:,}
+                    <span style="font-size: 12px; color: #B3B3B3; font-weight: normal;"> mentions</span></p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+else:
+    st.info("Scrape more Reddit or community data to surface unmet needs.")
+
+st.markdown("### 4. Real user voices")
+st.caption("Verbatim quotes from the feedback. These are useful for framing interview questions — not to be read as representative facts.")
 quotes = validation_quotes(df, n=5)
 if quotes:
     for quote in quotes:
@@ -223,7 +261,44 @@ if quotes:
 else:
     st.info("No negative quotes available in this run.")
 
-st.page_link("pages/4_💡_Strategic_Insights.py", label="Open Strategic Insights for AI-written answers by question →")
+st.markdown("### 5. Who to speak with next")
+st.caption(
+    "This is the segment most worth interviewing — highest volume of negative feedback and the clearest pain signal. "
+    "Use the quote above as a conversation starter."
+)
+_active_segments = [p for p in segment_profiles if p["negative_review_count"] > 0]
+if _active_segments:
+    _top = max(_active_segments, key=lambda s: s["negative_review_count"])
+    st.markdown(
+        f"""
+        <div style="background: #142818; border: 1px solid #1DB954; border-radius: 10px; padding: 20px; margin-bottom: 16px;">
+            <p style="color: #1DB954; font-size: 12px; font-weight: bold; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.5px;">Recommended segment for interviews</p>
+            <h3 style="margin: 0 0 8px 0; font-size: 18px;">{escape_html(_top['name'])}</h3>
+            <p style="color: #B3B3B3; font-size: 13px; margin: 0 0 12px 0;">{escape_html(_top['description'])}</p>
+            <p style="margin: 0 0 8px 0; font-size: 14px;">
+                <b>{_top['negative_review_count']:,} negative reviews</b> &nbsp;·&nbsp;
+                {_top['pct_of_negative']:.0f}% of all negative feedback &nbsp;·&nbsp;
+                Top issue: <b>{escape_html(_top['top_pain_area'])}</b>
+            </p>
+            <p style="margin: 12px 0 0 0; font-size: 13px; color: #B3B3B3; border-top: 1px solid #282828; padding-top: 12px;">
+                <b style="color: #FFFFFF;">Suggested opening question:</b>
+                <i> "Walk me through the last time Spotify played something you hadn't heard before — and whether it stuck."</i>
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    if len(_active_segments) > 1:
+        _runner_up = _active_segments[1] if _active_segments[1] != _top else (_active_segments[2] if len(_active_segments) > 2 else None)
+        if _runner_up:
+            st.caption(
+                f"Runner-up: **{_runner_up['name']}** ({_runner_up['negative_review_count']:,} negative reviews). "
+                "Consider them if you want a contrasting perspective."
+            )
+else:
+    st.info("Scrape more feedback to identify the best segment for interviews.")
+
+st.page_link("pages/4_💡_Strategic_Insights.py", label="See AI-written answers to all 6 discovery questions →")
 
 st.markdown("---")
 
