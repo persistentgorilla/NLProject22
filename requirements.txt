@@ -1,0 +1,26 @@
+# Core app
+streamlit>=1.30,<2.0
+python-dotenv>=1.0,<2.0
+
+# LLM (optional — strategic insight answers)
+openai>=1.30,<2.0
+
+# Scrapers (app-store-scraper omitted — it pins requests==2.23.0 and breaks
+# Streamlit's dependency resolver; App Store data is fetched via iTunes RSS fallback)
+google-play-scraper>=1.2,<2.0
+beautifulsoup4>=4.12,<5.0
+requests>=2.31,<3.0
+
+# Data & visualization
+pandas>=2.0,<3.0
+plotly>=5.18,<6.0
+wordcloud>=1.9,<2.0
+matplotlib>=3.7,<4.0
+openpyxl>=3.1,<4.0
+
+# NLP & analysis
+vaderSentiment>=3.3,<4.0
+textblob>=0.18,<1.0
+scikit-learn>=1.3,<2.0
+nltk>=3.8,<4.0
+statsmodels>=0.14,<1.0
