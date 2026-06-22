@@ -4,7 +4,7 @@ A feedback tool for Spotify product teams. It pulls reviews and discussions from
 
 Use it to answer practical questions: why users get stuck replaying the same tracks, what breaks in the recommendation experience, and which pain points keep showing up across channels.
 
-**Repository:** [github.com/persistentgorilla/NL_Project3](https://github.com/persistentgorilla/NL_Project3)
+**Repository:** [github.com/persistentgorilla/spotify-review-insights-NextLeap](https://github.com/persistentgorilla/spotify-review-insights-NextLeap)
 
 ---
 
@@ -157,8 +157,8 @@ If no key is set, the app falls back to rule-based summaries.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/persistentgorilla/NL_Project3.git
-cd NL_Project3
+git clone https://github.com/persistentgorilla/spotify-review-insights-NextLeap.git
+cd spotify-review-insights-NextLeap
 ```
 
 ### 2. Create and activate a virtual environment
@@ -210,7 +210,7 @@ The app opens at `http://localhost:8501`.
 
 1. Push this repository to GitHub.
 2. Go to [share.streamlit.io](https://share.streamlit.io) and sign in.
-3. Click **New app** and select `persistentgorilla/NL_Project3`.
+3. Click **New app** and select `persistentgorilla/spotify-review-insights-NextLeap`.
 4. Set **Main file path** to `app.py`.
 5. Set **Python version** to **3.11** (matches `.python-version` in the repo).
 6. Click **Deploy**.
@@ -242,10 +242,27 @@ Tests cover scraper schemas, sentiment and theme classification, review quality 
 
 ---
 
+## 🐛 Bug Fixes & Optimizations (this version)
+
+This repository is a corrected fork of the original. The following issues were identified and resolved:
+
+| File | Fix |
+|------|-----|
+| `utils/tier_inference.py` | Empty-list assignment to DataFrame column replaced with correctly-indexed `pd.Series` — prevented `ValueError` on empty datasets |
+| `analysis/user_segments.py` | Same shape-mismatch fix for `primary_user_segment` column |
+| `analysis/user_segments.py` | `negatives[col] == True` replaced with idiomatic `negatives[col]` boolean filter |
+| `analysis/insights_engine.py` | `df[df[col]]` corrected to `df[df[col].astype(bool)]` — theme filter was silently returning wrong rows |
+| `analysis/topic_modeling.py` | `np.argsort(idf)[:n]` → `np.argsort(idf)[-n:][::-1]` — was returning lowest-IDF (least important) terms instead of highest |
+| `visualizations/charts.py` | Heatmap index/column renaming uses `.astype(str).str.replace()` to handle non-string index types safely |
+| `visualizations/charts.py` | Rating jitter now uses seeded `np.random.default_rng(42)` for deterministic, flicker-free Streamlit renders |
+| `visualizations/wordclouds.py` | `import random` moved from per-word callback to module level (ran 100+ times per cloud render); `== True` filter replaced with `.astype(bool)` |
+
+---
+
 ## 📁 Repository Structure
 
 ```
-NL_Project3/
+spotify-review-insights-NextLeap/
 ├── app.py                          # Streamlit entry point & pipeline orchestrator
 ├── requirements.txt                # Python dependencies
 ├── README.md
