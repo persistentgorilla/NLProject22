@@ -187,7 +187,7 @@ pip install app-store-scraper --no-deps
 ## 🎮 Running the Application
 
 ```bash
-streamlit run app.py
+streamlit run Start_Here.py
 ```
 
 The app opens at `http://localhost:8501`.
@@ -211,7 +211,7 @@ The app opens at `http://localhost:8501`.
 1. Push this repository to GitHub.
 2. Go to [share.streamlit.io](https://share.streamlit.io) and sign in.
 3. Click **New app** and select `persistentgorilla/spotify-review-insights-NextLeap`.
-4. Set **Main file path** to `app.py`.
+4. Set **Main file path** to `Start_Here.py`.
 5. Set **Python version** to **3.11** (matches `.python-version` in the repo).
 6. Click **Deploy**.
 
@@ -263,7 +263,7 @@ This repository is a corrected fork of the original. The following issues were i
 
 ```
 spotify-review-insights-NextLeap/
-├── app.py                          # Streamlit entry point & pipeline orchestrator
+├── Start_Here.py                   # Streamlit entry point & pipeline orchestrator
 ├── requirements.txt                # Python dependencies
 ├── README.md
 ├── .env.example                    # Template for OPENAI_API_KEY (copy to .env locally)

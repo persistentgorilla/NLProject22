@@ -48,7 +48,7 @@ st.markdown(
 # Data Validation
 # ============================================================
 if "analyzed_data" not in st.session_state or st.session_state.analyzed_data.empty:
-    st.warning("⚠️ No analyzed data found. Please go back to the main portal page (app.py) in the sidebar to scrape or load data first.")
+    st.warning("⚠️ No analyzed data found. Please go back to Start Here in the sidebar to scrape or load data first.")
     st.stop()
 
 df_all = restore_analyzed_dataframe(st.session_state.analyzed_data.copy())
