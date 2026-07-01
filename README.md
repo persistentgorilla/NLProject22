@@ -4,7 +4,7 @@ A feedback tool for Spotify product teams. It pulls reviews and discussions from
 
 Use it to answer practical questions: why users get stuck replaying the same tracks, what breaks in the recommendation experience, and which pain points keep showing up across channels.
 
-**Repository:** [github.com/persistentgorilla/spotify-review-insights-NextLeap](https://github.com/persistentgorilla/spotify-review-insights-NextLeap)
+**Repository:** [github.com/persistentgorilla/NLProject](https://github.com/persistentgorilla/NLProject)
 
 ---
 
@@ -23,10 +23,11 @@ Use it to answer practical questions: why users get stuck replaying the same tra
   * **Subjectivity Indexing**: Measures subjective opinions vs. factual issues using TextBlob.
   * **Topic Modeling**: Clusters feedback using TF-IDF and Latent Dirichlet Allocation (LDA).
   * **Theme Taxonomy Classifier**: Rule-based keyword classifier for Discovery Frustrations, Algorithm Complaints, Playlist Issues, Listening Behavior, Feature Requests, and more.
-* **Streamlit Multi-page App**:
-  * **Dashboard** — Validation-first view: inferred tier toggle (All / Free / Premium), four user segments, top pain areas, quotes to validate, and optional supporting charts. **Reset** clears session and local cache.
-  * **Deep Dive** — Search and filter by segment, tier, source, sentiment, and themes; respects the Dashboard tier toggle. CSV + Excel export.
-  * **Strategic Insights** — AI-written (or rule-based) answers by discovery question, user segments, pain areas, and validation quotes. Excel export.
+* **Single-page Streamlit App** with four tabs:
+  * **🏠 Start Here** — Source selection, scrape controls (pulls max available reviews), and post-scrape summary.
+  * **📊 Dashboard** — Validation-first view: six Q&A cards, pain bars, user segments, quotes. Inferred tier toggle (All / Free / Premium) in sidebar. **Reset** clears session and local cache.
+  * **🔍 Deep Dive** — Search and filter by segment, tier, source, sentiment, themes, and date. Inline 2-column filter layout. CSV + Excel export.
+  * **💡 Strategic Insights** — AI-written (or rule-based) answers per discovery question, segment cards, pain areas, and validation quotes. Excel export.
 
 ---
 
@@ -53,7 +54,7 @@ Plain-language reference for what you see in the app. Technical method names (VA
 | **Minimum 4 words** | Single-word or fragment posts are rarely actionable for product decisions. |
 | **Deduplication** | Identical review text (case-insensitive) is counted once. |
 
-App store scraping is locked to **India (IN)** and **English**. Review targets per store: **0–5,000** (default 300).
+App store scraping is locked to **India (IN)** and **English**. Always scrapes the maximum available reviews (up to 5,000 per store).
 
 ### Sentiment
 
@@ -156,8 +157,8 @@ If no key is set, the app falls back to rule-based summaries.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/persistentgorilla/spotify-review-insights-NextLeap.git
-cd spotify-review-insights-NextLeap
+git clone https://github.com/persistentgorilla/NLProject.git
+cd NLProject
 ```
 
 ### 2. Create and activate a virtual environment
@@ -193,13 +194,12 @@ The app opens at `http://localhost:8501`.
 
 ### Workflow
 
-1. **Home page** — Run summary after scraping: review count, negative %, top pain, links to Dashboard and Strategic Insights.
-2. **Sidebar** — Pick sources, set app store targets (0–5,000; default 300), then **Start Scraping & Analysis**.
-3. **Dashboard** — Use **View by inferred user tier** (All / Free / Premium) to branch results. Review segments, pain areas, and validation quotes.
-4. **Strategic Insights** — Same tier toggle; read AI-written answers per discovery question (requires `OPENAI_API_KEY`).
-5. **Deep Dive** — Filter individual reviews; inherits tier selection from the Dashboard.
-6. **Load cache** — **Load Previously Analyzed Data** reloads CSV files from the local `data/` folder.
-7. **Reset** — On the Dashboard, **Reset** clears session data, insights cache, and local CSV files.
+1. **Start Here tab** — Pick sources in the sidebar, then click **Start Scraping & Analysis**. Pulls the maximum available reviews automatically.
+2. **Dashboard tab** — Use the **tier toggle** (All / Free / Premium) in the sidebar. Six Q&A cards, pain bars, segments, and validation quotes.
+3. **Strategic Insights tab** — AI-written (or rule-based) answers per discovery question. Same tier toggle applies.
+4. **Deep Dive tab** — Filter individual reviews inline; inherits tier from the sidebar.
+5. **Load cache** — **Load Cached Data** in Start Here reloads CSVs from the local `data/` folder.
+6. **Reset** — Sidebar Reset button clears session data, insights cache, and local CSV files.
 
 > **Re-analyze after updates:** If you loaded data before a feature release (e.g. tier labels), run a fresh scrape or load raw cache and re-analyze so new columns are populated.
 
@@ -209,7 +209,7 @@ The app opens at `http://localhost:8501`.
 
 1. Push this repository to GitHub.
 2. Go to [share.streamlit.io](https://share.streamlit.io) and sign in.
-3. Click **New app** and select `persistentgorilla/spotify-review-insights-NextLeap`.
+3. Click **New app** and select `persistentgorilla/NLProject`.
 4. Set **Main file path** to `Start_Here.py`.
 5. Set **Python version** to **3.11** (matches `.python-version` in the repo).
 6. Click **Deploy**.
@@ -261,8 +261,8 @@ This repository is a corrected fork of the original. The following issues were i
 ## 📁 Repository Structure
 
 ```
-spotify-review-insights-NextLeap/
-├── Start_Here.py                   # Streamlit entry point & pipeline orchestrator
+NLProject/
+├── Start_Here.py                   # Single-page Streamlit app (all tabs unified here)
 ├── requirements.txt                # Python dependencies
 ├── README.md
 ├── .env.example                    # Template for OPENAI_API_KEY (copy to .env locally)
@@ -289,10 +289,6 @@ spotify-review-insights-NextLeap/
 ├── visualizations/
 │   ├── charts.py
 │   └── wordclouds.py
-├── pages/
-│   ├── 1_📊_Dashboard.py
-│   ├── 2_🔍_Deep_Dive.py
-│   └── 4_💡_Strategic_Insights.py
 ├── utils/
 │   ├── data_io.py                  # CSV save/load with type restoration
 │   ├── html.py                     # HTML escaping for safe markup
