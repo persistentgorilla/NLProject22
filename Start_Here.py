@@ -402,7 +402,7 @@ with tab1:
                         st.session_state.insights = engine.answer_strategic_questions(analyzed)
                         st.session_state.insights_version = dataset_version(analyzed)
                         status_box.update(label="✅ Analysis complete!", state="complete")
-                        st.success("🎉 Done! Switch to the **Dashboard** or **Strategic Insights** tab.")
+                        st.rerun()
                     except Exception as exc:
                         status_box.update(label="❌ Analysis failed.", state="error")
                         st.error(f"Analysis pipeline failed: {exc}")
