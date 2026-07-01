@@ -4,7 +4,7 @@ A feedback tool for Spotify product teams. It pulls reviews and discussions from
 
 Use it to answer practical questions: why users get stuck replaying the same tracks, what breaks in the recommendation experience, and which pain points keep showing up across channels.
 
-**Repository:** [github.com/persistentgorilla/NLProject](https://github.com/persistentgorilla/NLProject)
+**Repository:** [github.com/persistentgorilla/NLProject22](https://github.com/persistentgorilla/NLProject22)
 
 ---
 

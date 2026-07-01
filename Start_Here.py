@@ -475,6 +475,7 @@ where recommendations fall short, why people replay the same tracks, and what th
                 file_name="spotify_analyzed_reviews.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True,
+                key="dl_home",
             )
         c1, c2, c3, c4 = st.columns(4)
         with c1: st.metric("Reviews", f"{len(df_home):,}")
@@ -532,6 +533,7 @@ with tab2:
             file_name="spotify_analyzed_reviews.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True,
+            key="dl_dashboard",
         )
 
     # KPI cards
@@ -887,13 +889,13 @@ with tab3:
         if not fdf.empty:
             st.download_button("📥 CSV", data=export_dataframe_to_csv(fdf),
                                file_name="filtered_reviews.csv", mime="text/csv",
-                               use_container_width=True)
+                               use_container_width=True, key="dl_dd_csv")
     with hr3:
         if not fdf.empty:
             st.download_button("📥 Excel", data=export_analyzed_dataframe_to_excel(fdf, sheet_name="Filtered"),
                                file_name="filtered_reviews.xlsx",
                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                               use_container_width=True)
+                               use_container_width=True, key="dl_dd_xlsx")
     with hr4:
         pass  # spacer
 
@@ -997,6 +999,7 @@ with tab4:
             file_name="spotify_strategic_insights.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True,
+            key="dl_insights",
         )
 
     if llm.is_available():
