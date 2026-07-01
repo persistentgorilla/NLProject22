@@ -428,7 +428,6 @@ if st.session_state.analyzed_data.empty:
             4. When it finishes, use the sidebar to move between:
                 * **Dashboard** — Volume, sentiment, and themes at a glance.
                 * **Deep Dive** — Search and filter individual reviews.
-                * **Trends** — How sentiment and themes shift over time.
                 * **Strategic Insights** — Answers to the six discovery questions below.
             
             #### Where the data comes from

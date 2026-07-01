@@ -26,7 +26,6 @@ Use it to answer practical questions: why users get stuck replaying the same tra
 * **Streamlit Multi-page App**:
   * **Dashboard** — Validation-first view: inferred tier toggle (All / Free / Premium), four user segments, top pain areas, quotes to validate, and optional supporting charts. **Reset** clears session and local cache.
   * **Deep Dive** — Search and filter by segment, tier, source, sentiment, and themes; respects the Dashboard tier toggle. CSV + Excel export.
-  * **Trends** — Sentiment and theme volume over time, with Excel export.
   * **Strategic Insights** — AI-written (or rule-based) answers by discovery question, user segments, pain areas, and validation quotes. Excel export.
 
 ---
@@ -89,7 +88,7 @@ App store scraping is locked to **India (IN)** and **English**. Review targets p
 | Metric | What it means |
 |--------|----------------|
 | **Subjectivity** | How opinion-heavy vs factual a review reads (TextBlob). High = personal take; low = descriptive or bug-report style. |
-| **7-day rolling avg (Trends)** | Smoothed sentiment line to reduce day-to-day noise when reading trends over time. |
+| **7-day rolling avg** | Smoothed sentiment line to reduce day-to-day noise when reading trends over time. |
 
 ### User segments (four consolidated groups)
 
@@ -293,7 +292,6 @@ spotify-review-insights-NextLeap/
 ├── pages/
 │   ├── 1_📊_Dashboard.py
 │   ├── 2_🔍_Deep_Dive.py
-│   ├── 3_📈_Trends.py
 │   └── 4_💡_Strategic_Insights.py
 ├── utils/
 │   ├── data_io.py                  # CSV save/load with type restoration

@@ -192,33 +192,6 @@ footer { display: none !important; }
 .qpill.seg    { background:#1C1C1C; color:#777; }
 .qpill.tier   { background:#1A1A2E; color:#A08FFF; }
 
-/* ── Callout card ── */
-.callout {
-    background:linear-gradient(135deg,#0A1E0F,#0F2214);
-    border:1px solid #1DB95430; border-radius:16px; padding:30px 32px;
-    position:relative; overflow:hidden;
-}
-.callout::after {
-    content:""; position:absolute; bottom:-40px; right:-40px;
-    width:140px; height:140px; border-radius:50%; background:#1DB95412;
-}
-.callout-badge {
-    display:inline-block; font-size:10px; font-weight:700; letter-spacing:1.5px;
-    text-transform:uppercase; color:#1DB954; background:#1DB95418;
-    padding:4px 12px; border-radius:20px; margin-bottom:16px;
-}
-.callout-name  { font-size:24px; font-weight:700; margin:0 0 8px; }
-.callout-desc  { font-size:13px; color:#4E7A58; margin:0 0 22px; line-height:1.55; }
-.callout-stats { display:flex; gap:32px; flex-wrap:wrap; margin-bottom:20px; }
-.cs-val   { font-size:30px; font-weight:700; color:#1DB954; margin:0; line-height:1; }
-.cs-lbl   { font-size:11px; color:#3A5E42; margin:5px 0 0; }
-.cs-str   { font-size:16px; font-weight:600; color:#1DB954; padding-top:7px; }
-.callout-q {
-    background:#0A160C; border-left:3px solid #1DB95450;
-    border-radius:0 8px 8px 0; padding:14px 18px;
-    font-size:13px; color:#5E8A68; font-style:italic; line-height:1.65;
-}
-
 /* ── Expander override ── */
 details[data-baseweb="accordion"] {
     background:#111 !important; border:1px solid #222 !important;
@@ -622,47 +595,6 @@ if quotes:
         )
 else:
     st.info("No negative quotes found in this run.")
-
-# ══════════════════════════════════════════════════════════════════════════════
-# SECTION: Top segment focus
-# ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<hr class="divider">', unsafe_allow_html=True)
-_hdr("Focus", "green",
-     "The group most worth understanding better",
-     "Highest volume of negative feedback, clearest pain signal, most distinct complaint pattern.")
-
-_active = [p for p in segment_profiles if p["negative_review_count"] > 0]
-if _active:
-    top = max(_active, key=lambda s: s["negative_review_count"])
-    sq  = f'<div class="callout-q">&ldquo;{escape_html(top["sample_quote"])}&rdquo;</div>' \
-          if top.get("sample_quote") else ""
-    st.markdown(
-        f'<div class="callout">'
-        f'  <span class="callout-badge">Highest signal group</span>'
-        f'  <h3 class="callout-name">{escape_html(top["name"])}</h3>'
-        f'  <p class="callout-desc">{escape_html(top["description"])}</p>'
-        f'  <div class="callout-stats">'
-        f'    <div><p class="cs-val">{top["negative_review_count"]:,}</p><p class="cs-lbl">negative reviews</p></div>'
-        f'    <div><p class="cs-val">{top["pct_of_negative"]:.0f}%</p><p class="cs-lbl">of all negative feedback</p></div>'
-        f'    <div><p class="cs-str">{escape_html(top["top_pain_area"])}</p><p class="cs-lbl">main frustration</p></div>'
-        f'  </div>'
-        f'  {sq}'
-        f'</div>',
-        unsafe_allow_html=True,
-    )
-    others = [s for s in _active if s["id"] != top["id"]]
-    if others:
-        ru = others[0]
-        st.caption(
-            f"Runner-up: **{ru['name']}** — {ru['negative_review_count']:,} negative reviews, "
-            f"main issue: {ru['top_pain_area']}."
-        )
-else:
-    st.info("Scrape more feedback to identify which group has the clearest pain signal.")
-
-st.markdown("<div style='margin-top:24px'></div>", unsafe_allow_html=True)
-st.page_link("pages/4_💡_Strategic_Insights.py",
-             label="See the full analysis behind each question →")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Supporting charts (collapsed)
