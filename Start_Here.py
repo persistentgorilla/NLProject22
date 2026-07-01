@@ -31,11 +31,7 @@ from utils.session_reset import reset_app_state
 from utils.dashboard_context import (
     clear_dashboard_cache, dataset_version,
     get_exec_summary, get_insights, validation_quotes,
-    negative_pct, prepare_dashboard_df,
-)
-from utils.tier_inference import (
-    TIER_ALL, TIER_FREE, TIER_PREMIUM, TIER_LABELS,
-    assign_inferred_tier, filter_by_tier, tier_counts,
+    negative_pct,
 )
 from visualizations import ChartBuilder, WordCloudGenerator
 
@@ -149,7 +145,6 @@ footer { display: none !important; }
 .qpill { font-size:10px; font-weight:600; letter-spacing:0.4px; padding:3px 10px; border-radius:12px; }
 .qpill.src  { background:#1A2E1A; color:#57C878; }
 .qpill.seg  { background:#1C1C1C; color:#777; }
-.qpill.tier { background:#1A1A2E; color:#A08FFF; }
 
 /* ── Strategic insights ── */
 .finding-card { background:#1A1A1A; border-left:4px solid #1DB954; padding:12px 15px; margin-bottom:10px; border-radius:0 8px 8px 0; line-height:1.55; }
@@ -211,21 +206,7 @@ language = settings.PLAYSTORE_DEFAULT_LANG
 
 st.sidebar.markdown("---")
 
-# Tier toggle — only when data is loaded
-tier_filter = TIER_ALL
 if has_data:
-    st.sidebar.subheader("👤 View by tier")
-    st.sidebar.caption("Inferred from review text, not Spotify account data.")
-    if "dashboard_tier_filter" not in st.session_state:
-        st.session_state.dashboard_tier_filter = TIER_ALL
-    tier_filter = st.sidebar.radio(
-        "Tier",
-        options=[TIER_ALL, TIER_FREE, TIER_PREMIUM],
-        format_func=lambda k: TIER_LABELS[k],
-        key="dashboard_tier_filter",
-        label_visibility="collapsed",
-    )
-    st.sidebar.markdown("---")
     if st.sidebar.button("↺ Reset", use_container_width=True,
                          help="Clears all data and analysis."):
         reset_app_state()
@@ -491,23 +472,10 @@ with tab2:
         st.warning("No data yet. Go to **Start Here** and run a scrape, or load cached data.")
         st.stop()
 
-    df_full  = restore_analyzed_dataframe(st.session_state.analyzed_data.copy())
+    df       = restore_analyzed_dataframe(st.session_state.analyzed_data.copy())
     topics   = st.session_state.get("topics", [])
-    tc_all   = tier_counts(df_full)
 
-    st.caption(
-        f"Tier inferred from review text — not Spotify account data: "
-        f"**{tc_all['free']:,}** likely Free · **{tc_all['premium']:,}** likely Premium · "
-        f"**{tc_all['unclassified']:,}** unclear"
-    )
-
-    df = prepare_dashboard_df(df_full, tier_filter)
-    if tier_filter != TIER_ALL and df.empty:
-        st.warning(f"No reviews matched **{TIER_LABELS[tier_filter]}**. Switch to **All users** in the sidebar.")
-        st.stop()
-
-    view_label = TIER_LABELS[tier_filter]
-    exec_summary     = get_exec_summary(df, tier_filter)
+    exec_summary     = get_exec_summary(df)
     segment_profiles = exec_summary.get("segment_profiles", [])
     pain_themes      = exec_summary.get("pain_themes", [])
     neg_count        = exec_summary.get("negative_review_count", 0)
@@ -540,7 +508,7 @@ with tab2:
     st.markdown(
         f"""<div class="kpi-row">
           <div class="kpi-card c-green"><p class="lbl">Reviews analyzed</p>
-            <p class="val">{total:,}</p><p class="sub">{view_label} · {src_count} source{"s" if src_count!=1 else ""}</p></div>
+            <p class="val">{total:,}</p><p class="sub">{src_count} source{"s" if src_count!=1 else ""}</p></div>
           <div class="kpi-card c-red"><p class="lbl">Negative reviews</p>
             <p class="val">{neg_count:,}</p><p class="sub">Primary signal for pain areas</p></div>
           <div class="kpi-card c-amber"><p class="lbl">Share that is negative</p>
@@ -743,17 +711,13 @@ with tab2:
     quotes = validation_quotes(df, n=5)
     if quotes:
         for q in quotes:
-            tier_pill = (
-                f'<span class="qpill tier">{escape_html(q["tier"])}</span>'
-                if q.get("tier") not in ("unclassified", None, "") else ""
-            )
             st.markdown(
                 f'<div class="quote-card"><div class="quote-mark">&ldquo;</div>'
                 f'<p class="quote-text">{escape_html(q["text"])}</p>'
                 f'<div class="quote-pills">'
                 f'<span class="qpill src">{escape_html(q["source"])}</span>'
                 f'<span class="qpill seg">{escape_html(q["segment"])}</span>'
-                f'{tier_pill}</div></div>',
+                f'</div></div>',
                 unsafe_allow_html=True,
             )
     else:
@@ -793,8 +757,6 @@ with tab3:
         st.stop()
 
     df_dd = restore_analyzed_dataframe(st.session_state.analyzed_data.copy())
-    df_dd = assign_inferred_tier(df_dd) if "inferred_user_tier" not in df_dd.columns else df_dd
-    df_dd = prepare_dashboard_df(df_dd, tier_filter)
     df_dd["date"] = pd.to_datetime(df_dd["date"], errors="coerce", utc=True).dt.tz_convert(None)
 
     st.markdown(
@@ -970,14 +932,9 @@ with tab4:
 
     df_si   = restore_analyzed_dataframe(st.session_state.analyzed_data.copy())
     llm     = LLMAnalyzer()
-    df_si   = prepare_dashboard_df(df_si, tier_filter)
 
-    if tier_filter != TIER_ALL and df_si.empty:
-        st.warning(f"No reviews matched **{TIER_LABELS[tier_filter]}**. Switch to **All users** in the sidebar.")
-        st.stop()
-
-    exc_si   = get_exec_summary(df_si, tier_filter)
-    insights = get_insights(df_si, tier_filter, use_llm=llm.is_available())
+    exc_si   = get_exec_summary(df_si)
+    insights = get_insights(df_si, use_llm=llm.is_available())
 
     seg_si   = exc_si.get("segment_profiles", [])
     pain_si  = exc_si.get("pain_themes", [])
