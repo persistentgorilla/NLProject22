@@ -25,8 +25,8 @@ Use it to answer practical questions: why users get stuck replaying the same tra
   * **Theme Taxonomy Classifier**: Rule-based keyword classifier for Discovery Frustrations, Algorithm Complaints, Playlist Issues, Listening Behavior, Feature Requests, and more.
 * **Single-page Streamlit App** with four tabs:
   * **🏠 Start Here** — Source selection, scrape controls (pulls max available reviews), and post-scrape summary.
-  * **📊 Dashboard** — Validation-first view: six Q&A cards, pain bars, user segments, quotes. Inferred tier toggle (All / Free / Premium) in sidebar. **Reset** clears session and local cache.
-  * **🔍 Deep Dive** — Search and filter by segment, tier, source, sentiment, themes, and date. Inline 2-column filter layout. CSV + Excel export.
+  * **📊 Dashboard** — Validation-first view: six Q&A cards, pain bars, user segments, quotes. **Reset** clears session and local cache.
+  * **🔍 Deep Dive** — Search and filter by segment, source, sentiment, themes, and date. Inline filter layout. CSV + Excel export.
   * **💡 Strategic Insights** — AI-written (or rule-based) answers per discovery question, segment cards, pain areas, and validation quotes. Excel export.
 
 ---
@@ -39,7 +39,7 @@ Plain-language reference for what you see in the app. Technical method names (VA
 
 | Metric | What it means |
 |--------|----------------|
-| **Reviews in view** | Feedback in the current Dashboard filter (All users, or Free/Premium inferred tier). |
+| **Reviews in view** | All feedback collected across the selected sources. |
 | **Negative reviews** | Reviews with negative tone — primary signal for user problems. |
 | **% negative** | Share of the current view that is negative. |
 | **Top pain area** | Most common themed problem among negative reviews in the current view. |
@@ -104,18 +104,6 @@ Reviews can belong to more than one segment. These four cohorts are what you val
 
 Each segment card shows negative review count, share of all negative feedback, and top issue. Strategic Insights adds AI-written answers per discovery question when an API key is configured.
 
-### Inferred Free vs Premium toggle
-
-The Dashboard and Strategic Insights include a **View by inferred user tier** toggle:
-
-| Option | Meaning |
-|--------|---------|
-| **All users** | Full dataset (default) |
-| **Free (inferred)** | Reviews whose text mentions free-tier signals (ads, free plan, etc.) |
-| **Premium (inferred)** | Reviews mentioning premium, subscription, or paid plan |
-
-This is **inferred from review text**, not Spotify account metadata. Deep Dive respects the same toggle (set on the Dashboard). The `inferred_user_tier` column is added during analysis.
-
 ### Optional: AI-written insight answers
 
 Strategic question answers can be written in plain language using OpenAI.
@@ -157,8 +145,8 @@ If no key is set, the app falls back to rule-based summaries.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/persistentgorilla/NLProject.git
-cd NLProject
+git clone https://github.com/persistentgorilla/NLProject22.git
+cd NLProject22
 ```
 
 ### 2. Create and activate a virtual environment
@@ -195,13 +183,11 @@ The app opens at `http://localhost:8501`.
 ### Workflow
 
 1. **Start Here tab** — Pick sources in the sidebar, then click **Start Scraping & Analysis**. Pulls the maximum available reviews automatically.
-2. **Dashboard tab** — Use the **tier toggle** (All / Free / Premium) in the sidebar. Six Q&A cards, pain bars, segments, and validation quotes.
-3. **Strategic Insights tab** — AI-written (or rule-based) answers per discovery question. Same tier toggle applies.
-4. **Deep Dive tab** — Filter individual reviews inline; inherits tier from the sidebar.
+2. **Dashboard tab** — Six Q&A cards answering the discovery questions, pain bars, segment cards, and validation quotes.
+3. **Strategic Insights tab** — AI-written (or rule-based) answers per discovery question with evidence metrics and quotes.
+4. **Deep Dive tab** — Search and filter individual reviews by source, sentiment, segment, themes, rating, and date.
 5. **Load cache** — **Load Cached Data** in Start Here reloads CSVs from the local `data/` folder.
 6. **Reset** — Sidebar Reset button clears session data, insights cache, and local CSV files.
-
-> **Re-analyze after updates:** If you loaded data before a feature release (e.g. tier labels), run a fresh scrape or load raw cache and re-analyze so new columns are populated.
 
 ---
 
@@ -209,7 +195,7 @@ The app opens at `http://localhost:8501`.
 
 1. Push this repository to GitHub.
 2. Go to [share.streamlit.io](https://share.streamlit.io) and sign in.
-3. Click **New app** and select `persistentgorilla/NLProject`.
+3. Click **New app** and select `persistentgorilla/NLProject22`.
 4. Set **Main file path** to `Start_Here.py`.
 5. Set **Python version** to **3.11** (matches `.python-version` in the repo).
 6. Click **Deploy**.
@@ -237,7 +223,7 @@ Run the unit test suite:
 python3 -m unittest discover -s tests -v
 ```
 
-Tests cover scraper schemas, sentiment and theme classification, review quality filters, user segments, tier inference, optional LLM insight shape, and CSV/Excel export round-trips.
+Tests cover scraper schemas, sentiment and theme classification, review quality filters, user segments, optional LLM insight shape, and CSV/Excel export round-trips.
 
 ---
 
@@ -261,7 +247,7 @@ This repository is a corrected fork of the original. The following issues were i
 ## 📁 Repository Structure
 
 ```
-NLProject/
+NLProject22/
 ├── Start_Here.py                   # Single-page Streamlit app (all tabs unified here)
 ├── requirements.txt                # Python dependencies
 ├── README.md
@@ -294,7 +280,6 @@ NLProject/
 │   ├── html.py                     # HTML escaping for safe markup
 │   ├── session_reset.py            # Clear session state and local data cache
 │   ├── dashboard_context.py        # Cached exec summary, validation quotes
-│   ├── tier_inference.py           # Inferred Free / Premium from review text
 │   └── text_filters.py             # Emoji and minimum word-count filters
 ├── data/
 │   └── .gitkeep                    # Local cache for scraped CSVs (gitignored)
@@ -321,12 +306,11 @@ NLProject/
 |-------|--------|
 | Unit tests (`tests/test_scrapers.py`, 17 tests) | Pass |
 | Core module imports | Pass |
-| `utils` package (data I/O, filters, session reset, tier inference) | Present |
+| `utils` package (data I/O, filters, session reset) | Present |
 | Validation-first Dashboard (segments, pain, quotes) | Configured |
 | India-only / English-only app store scraping | Configured |
 | Review quality filter (no emojis, ≥4 words) | Configured |
 | User segments (4 consolidated cohorts) | Configured |
-| Inferred Free / Premium tier toggle | Configured |
 | Optional LLM insight answers (`OPENAI_API_KEY`) | Configured |
 | Streamlit config (`.streamlit/config.toml`) | Configured |
 | Requirements pinned for cloud deploy | Configured |

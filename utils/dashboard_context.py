@@ -9,23 +9,14 @@ import streamlit as st
 
 from analysis import InsightsEngine, LLMAnalyzer
 from config.settings import SENTIMENT_NEGATIVE_THRESHOLD
-from utils.tier_inference import (
-    TIER_ALL,
-    TIER_FREE,
-    TIER_LABELS,
-    TIER_PREMIUM,
-    assign_inferred_tier,
-    filter_by_tier,
-    tier_counts,
-)
 
 
-def dataset_version(df: pd.DataFrame, tier_filter: str = TIER_ALL) -> str:
+def dataset_version(df: pd.DataFrame) -> str:
     """Lightweight fingerprint so cached summaries refresh when data changes."""
     if df.empty:
-        return f"empty:{tier_filter}"
+        return "empty"
     sources = ",".join(sorted(df["source"].astype(str).unique())) if "source" in df.columns else ""
-    return f"{len(df)}:{sources}:{tier_filter}"
+    return f"{len(df)}:{sources}"
 
 
 def get_insights_engine() -> InsightsEngine:
@@ -34,57 +25,31 @@ def get_insights_engine() -> InsightsEngine:
     return st.session_state.insights_engine
 
 
-def prepare_dashboard_df(df: pd.DataFrame, tier_filter: str) -> pd.DataFrame:
-    """Ensure tier column exists and apply tier filter."""
-    working = assign_inferred_tier(df) if "inferred_user_tier" not in df.columns else df.copy()
-    return filter_by_tier(working, tier_filter)
-
-
-def render_tier_toggle() -> str:
-    """Dashboard toggle for All / Free / Premium views. Persists in session."""
-    if "dashboard_tier_filter" not in st.session_state:
-        st.session_state.dashboard_tier_filter = TIER_ALL
-
-    tier_filter = st.radio(
-        "View by inferred user tier",
-        options=[TIER_ALL, TIER_FREE, TIER_PREMIUM],
-        format_func=lambda key: TIER_LABELS[key],
-        horizontal=True,
-        key="dashboard_tier_filter",
-        help=(
-            "Free and Premium are inferred from words in the review (e.g. ads, subscription). "
-            "This is not Spotify account data."
-        ),
-    )
-    return tier_filter
-
-
-def get_exec_summary(df: pd.DataFrame, tier_filter: str = TIER_ALL) -> Dict[str, Any]:
-    version = dataset_version(df, tier_filter)
-    cache: Dict[str, Dict[str, Any]] = st.session_state.setdefault("exec_summary_by_tier", {})
+def get_exec_summary(df: pd.DataFrame) -> Dict[str, Any]:
+    version = dataset_version(df)
+    cache: Dict[str, Dict[str, Any]] = st.session_state.setdefault("exec_summary_cache", {})
     if version not in cache:
         engine = get_insights_engine()
         cache[version] = engine.get_executive_summary(df)
-        st.session_state.exec_summary_by_tier = cache
+        st.session_state.exec_summary_cache = cache
     return cache[version]
 
 
 def get_insights(
     df: pd.DataFrame,
-    tier_filter: str = TIER_ALL,
     use_llm: Optional[bool] = None,
 ) -> List[Dict[str, Any]]:
-    version = dataset_version(df, tier_filter)
+    version = dataset_version(df)
     llm = LLMAnalyzer()
     llm_enabled = llm.is_available() if use_llm is None else use_llm
 
-    cache: Dict[str, List[Dict[str, Any]]] = st.session_state.setdefault("insights_by_tier", {})
+    cache: Dict[str, List[Dict[str, Any]]] = st.session_state.setdefault("insights_cache", {})
     meta_key = f"{version}:llm={llm_enabled}"
     if meta_key not in cache:
         engine = get_insights_engine()
         with st.spinner("Building insight answers…"):
             cache[meta_key] = engine.answer_strategic_questions(df, use_llm=llm_enabled)
-        st.session_state.insights_by_tier = cache
+        st.session_state.insights_cache = cache
 
     return cache[meta_key]
 
@@ -138,7 +103,6 @@ def validation_quotes(df: pd.DataFrame, n: int = 5) -> List[Dict[str, Any]]:
                 "text": display,
                 "source": str(row.get("source", "unknown")),
                 "segment": str(row.get("primary_user_segment", "General feedback")),
-                "tier": str(row.get("inferred_user_tier", "unclassified")),
                 "sentiment": float(row.get("sentiment_compound", 0.0)),
             }
         )
@@ -151,7 +115,9 @@ def clear_dashboard_cache() -> None:
     for key in (
         "exec_summary",
         "exec_summary_version",
+        "exec_summary_cache",
         "exec_summary_by_tier",
+        "insights_cache",
         "insights_by_tier",
         "insights_version",
         "insights_llm_enabled",

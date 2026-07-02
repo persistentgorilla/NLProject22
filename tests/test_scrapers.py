@@ -358,30 +358,6 @@ class TestScrapersAndAnalysis(unittest.TestCase):
         self.assertEqual(len(quotes), 1)
         self.assertIn("repeat", quotes[0]["text"].lower())
 
-    def test_tier_inference(self) -> None:
-        """Verifies Free vs Premium tier is inferred from review keywords."""
-        from utils.tier_inference import infer_tier_from_text, filter_by_tier, assign_inferred_tier
-
-        self.assertEqual(infer_tier_from_text("Too many ads on the free version"), "free")
-        self.assertEqual(infer_tier_from_text("Spotify premium subscription is too expensive"), "premium")
-        self.assertEqual(infer_tier_from_text("Great playlists every week"), "unclassified")
-
-        df = assign_inferred_tier(
-            pd.DataFrame(
-                {
-                    "review_text": [
-                        "Too many ads on free spotify",
-                        "Premium subscription worth it",
-                        "Love the discover weekly playlist",
-                    ]
-                }
-            )
-        )
-        free_only = filter_by_tier(df, "free")
-        self.assertEqual(len(free_only), 1)
-        premium_only = filter_by_tier(df, "premium")
-        self.assertEqual(len(premium_only), 1)
-
 
 if __name__ == "__main__":
     unittest.main()
